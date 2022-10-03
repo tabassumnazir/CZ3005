@@ -14,6 +14,7 @@ public abstract class Algorithm {
         public int cost = -1;
         public float dist = -1;
     }
+
     public static String readFileAsString(String file)throws Exception
     {
         return new String(Files.readAllBytes(Paths.get(file)));
@@ -42,7 +43,7 @@ public abstract class Algorithm {
             adjList = new HashMap<Integer,Map<Integer, adjNode>>();
             for (Map.Entry<Integer,ArrayList<Integer>> entry : gMap.entrySet()){
                 innerMap = new HashMap<Integer, adjNode>();
-                for (Integer dest: entry.getValue()){
+                for (Integer dest: entry.getValue()) {
                     innerMap.put(dest, new adjNode());
                 }
                 adjList.put(entry.getKey(), innerMap);
