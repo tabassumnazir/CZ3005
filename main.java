@@ -44,5 +44,7 @@ public class main {
             endNode = Integer.parseInt(sc.nextLine());
             runTask.run(startNode, endNode);
         }
+
+        sc.close();
     }
 }
