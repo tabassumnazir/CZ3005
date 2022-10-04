@@ -41,7 +41,7 @@ public class Task1 extends Utility {
 
 		while(pq.size() != 0){
 
-			cur = pq.poll();
+			current = pq.poll();
 
 			if (current.node == endNode) {
 				System.out.println("\nShortest Path: " + current.path);
