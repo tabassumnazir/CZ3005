@@ -1,164 +1,84 @@
-// Importing utility classes
-import java.util.*;
+import java.util.HashSet;
+import java.util.PriorityQueue;
+import java.util.Set;
+import java.util.Map.Entry;
 
-// Main class DPQ
-public class task1 {
+public class task1 extends Utility {
 
-	// Member variables of this class
-	private int dist[];
-	private Set<Integer> settled;
-	private PriorityQueue<Node> pq;
-	// Number of vertices
-	private int V;
-	List<List<Node> > adj;
+	class qNode implements Comparable<qNode>{
+		int node;
+		float totalDist;
+		String path;
 
-	// Constructor
-	public task1(int V)
-	{
-		this.V = V;
-		dist = new int[V];
-		settled = new HashSet<Integer>();
-		pq = new PriorityQueue<Node>(V, new Node());
+		qNode(int node, float dist){
+			this.node = node;
+			this.totalDist = dist;
+			this.path = "";
+		}
+
+		@Override
+		public int compareTo(qNode node) {
+			return Float.compare(this.totalDist, node.totalDist);
+		};
+
+		@Override
+		public boolean equals(Object o) {
+			if (o == this) return true;
+			if (!(o instanceof qNode)) return false;
+			qNode q = (qNode) o;
+			return Integer.compare(this.node, q.node) == 0;
+		}
 	}
 
-	// Method 1
-	// Dijkstra's Algorithm
-	public void dijkstra(List<List<Node> > adj, int src)
-	{
-		this.adj = adj;
+	public void run(int startNode, int endNode)  {
+		qNode cur = new qNode(startNode, 0);
+		qNode child;
+        PriorityQueue<qNode> pq = new PriorityQueue<qNode>();
+		Set<Integer> expanded = new HashSet<Integer>();
 
-		for (int i = 0; i < V; i++)
-			dist[i] = Integer.MAX_VALUE;
+		// add startNode to the queue
+		cur.path = Integer.toString(startNode);
+		pq.add(cur);
 
-		// Add source node to the priority queue
-		pq.add(new Node(src, 0));
+		// continue until all nodes have been expanded
+		while(pq.size() != 0){
 
-		// Distance to the source is 0
-		dist[src] = 0;
+			// set current node at head of priority queue
+			cur = pq.poll();
 
-		while (settled.size() != V) {
-
-			// When the priority queue is empty, return
-			if (pq.isEmpty())
+			// if current node is goal state, end search
+			if (cur.node == endNode) {
+				System.out.println("\nShortest Path: " + cur.path);
+				System.out.println("Shortest Distance: " + cur.totalDist + "\n"); 
 				return;
-
-			// Removing the minimum distance node from the priority queue
-			int u = pq.remove().node;
-
-			// Adding the node whose distance is finalized
-			if (settled.contains(u))
-				continue;
-
-			// We don't have to call e_Neighbors(u)
-			// if u is already present in the settled set.
-			settled.add(u);
-
-			e_Neighbours(u);
-		}
-	}
-
-	// Method 2
-	// To process all the neighbours of the passed node
-	private void e_Neighbours(int u)
-	{
-
-		int edgeDistance = -1;
-		int newDistance = -1;
-
-		// All the neighbors of v
-		for (int i = 0; i < adj.get(u).size(); i++) {
-			Node v = adj.get(u).get(i);
-
-			// If current node hasn't already been processed
-			if (!settled.contains(v.node)) {
-				edgeDistance = v.cost;
-				newDistance = dist[u] + edgeDistance;
-
-				// If new distance is cheaper in cost
-				if (newDistance < dist[v.node])
-					dist[v.node] = newDistance;
-
-				// Add the current node to the queue
-				pq.add(new Node(v.node, dist[v.node]));
 			}
+
+			// if current node has not been expanded before
+			if (!expanded.contains(cur.node)){
+
+				// mark current node as expanded
+				expanded.add(cur.node);
+            
+				// examine each neighbour of the expanded node
+				for (Entry<Integer,adjNode> mapNode: adjList.get(cur.node).entrySet()){
+					child = new qNode(mapNode.getKey(), mapNode.getValue().dist + cur.totalDist);
+					child.path = cur.path + "->" + child.node; // set child's path
+					
+					if (!pq.contains(child)) {
+						pq.add(child);
+					} else { // node has been queued before
+						for(qNode node: pq){ // find for the child node
+							if (node.equals(child) && node.totalDist > child.totalDist){ // if path in queue is longer than this new path, replace entry
+								pq.remove(node);
+								pq.add(child);
+								break;
+							}
+						}
+					}
+				}
+			}
+			
 		}
-	}
-
-	// Main driver method
-	public static void main(String arg[])
-	{
-
-		int V = 5;
-		int source = 0;
-
-		// Adjacency list representation of the
-		// connected edges by declaring List class object
-		// Declaring object of type List<Node>
-		List<List<Node> > adj
-			= new ArrayList<List<Node> >();
-
-		// Initialize list for every node
-		for (int i = 0; i < V; i++) {
-			List<Node> item = new ArrayList<Node>();
-			adj.add(item);
-		}
-
-		// Inputs for the GFG(dpq) graph
-		adj.get(0).add(new Node(1, 9));
-		adj.get(0).add(new Node(2, 6));
-		adj.get(0).add(new Node(3, 5));
-		adj.get(0).add(new Node(4, 3));
-
-		adj.get(2).add(new Node(1, 2));
-		adj.get(2).add(new Node(3, 4));
-
-		// Calculating the single source shortest path
-	    task1 dpq = new task1(V);
-		dpq.dijkstra(adj, source);
-
-		// Printing the shortest path to all the nodes
-		// from the source node
-		System.out.println("The shorted path from node :");
-
-		for (int i = 0; i < dpq.dist.length; i++)
-			System.out.println(source + " to " + i + " is "
-							+ dpq.dist[i]);
-	}
-}
-
-// Class 2
-// Helper class implementing Comparator interface
-// Representing a node in the graph
-class Node implements Comparator<Node> {
-
-	// Member variables of this class
-	public int node;
-	public int cost;
-
-	// Constructors of this class
-
-	// Constructor 1
-	public Node() {}
-
-	// Constructor 2
-	public Node(int node, int cost)
-	{
-
-		// This keyword refers to current instance itself
-		this.node = node;
-		this.cost = cost;
-	}
-
-	// Method 1
-	@Override public int compare(Node node1, Node node2)
-	{
-
-		if (node1.cost < node2.cost)
-			return -1;
-
-		if (node1.cost > node2.cost)
-			return 1;
-
-		return 0;
+		System.out.println("No path found");
 	}
 }

@@ -17,15 +17,15 @@ public class main {
                 "Choose task to run: "
             );
             choice = Integer.parseInt(sc.nextLine());
-            /*if(choice == 1){
-                runTask = new UCS();
+            if(choice == 1){
+                runTask = new task1();
             }
             else if(choice == 2){
                 System.out.print("Enter budget: ");
                 Utility.energyBudget = Integer.parseInt(sc.nextLine());
-                runTask = new UCS_Budget();
-            }*/
-            if(choice == 3){
+                runTask = new Task2();
+            }
+            else if(choice == 3){
                 System.out.print("Enter budget: ");
                 Utility.energyBudget = Integer.parseInt(sc.nextLine());
                 runTask = new Task3();

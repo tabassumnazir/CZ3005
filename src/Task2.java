@@ -3,84 +3,86 @@ import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.Map.Entry;
 
-public class Task2 extends Algorithm {
-    // for implementing the priority queue: automaticallly sorts the queue by using .compareTo
-	class queueNode implements Comparable<queueNode>{
-		int element;
+public class Task2 extends Utility {
+    
+	class qNode implements Comparable<qNode>{
+		int node;
 		float totalDist;
 		int totalCost;
 		String path;
 
-		queueNode(int element, float dist, int cost){
-			this.element = element;
+		qNode(int node, float dist, int cost){
+			this.node = node;
 			this.totalDist = dist;
 			this.totalCost = cost;
 			this.path = "";
 		}
 
 		@Override
-		public int compareTo(queueNode that) {
-			return Float.compare(this.totalDist, that.totalDist);
+		public int compareTo(qNode node) {
+			return Float.compare(this.totalDist, node.totalDist);
 		};
 
 		@Override
 		public boolean equals(Object o) {
 			if (o == this) return true;
-			if (!(o instanceof queueNode)) return false;
-			queueNode q = (queueNode) o;
-			return Integer.compare(this.element, q.element) == 0;
+			if (!(o instanceof qNode)) return false;
+			qNode q = (qNode) o;
+			return Integer.compare(this.node, q.node) == 0;
 		}
 	}
 
 	public void run(int startNode, int endNode)  {
-		queueNode curNode = new queueNode(startNode, 0, 0);
-		queueNode childNode;
-        PriorityQueue<queueNode> priorityQueue = new PriorityQueue<queueNode>();
-		Set<Integer> explored = new HashSet<Integer>();
+		qNode cur = new qNode(startNode, 0, 0);
+		qNode child;
+        PriorityQueue<qNode> pq = new PriorityQueue<qNode>();
+		Set<Integer> expanded = new HashSet<Integer>();
 
-		// add startNode to the queue
-		curNode.path = Integer.toString(startNode);
-		priorityQueue.add(curNode);
-		int nodesExamined = 0;
+		cur.path = Integer.toString(startNode);
+		pq.add(cur); // add startNode to priority queue
+		//int nodesExamined = 0;
+
 		// continue until all nodes have been expanded
-		while(priorityQueue.size() != 0){
-			nodesExamined++;
-			// set current node to top of the priority queue
-			curNode = priorityQueue.poll();
+		while(pq.size() != 0){
+			//nodesExamined++;
+			// set current node to head of priority queue
+			cur = pq.poll();
 
-			// node chosen to expand is goal state, search is complete
-			if (curNode.element == endNode) {
-				System.out.println("\nShortest path: " + curNode.path);
-				System.out.println("Shortest distance: " + curNode.totalDist); 
-                System.out.println("Total energy cost: " + curNode.totalCost);
-				System.out.println("Nodes Examined: "+nodesExamined  + "\n");				
+            // if current node is the goal state, end search
+			if (cur.node == endNode) {
+				System.out.println("\nShortest path: " + cur.path);
+				System.out.println("Shortest distance: " + cur.totalDist); 
+                System.out.println("Total energy cost: " + cur.totalCost);
+				// System.out.println("Nodes Examined: " + nodesExamined + "\n");				
 				return;
 			}
 
-			// current node has not previously been expanded
-			if (!explored.contains(curNode.element)){
-
+			// if current node has not been expanded before
+			if (!expanded.contains(cur.node)){
 				// mark current node as expanded
-				explored.add(curNode.element);
+				expanded.add(cur.node);
             
 				// Examine each neighbour of the expanded node
-				for (Entry<Integer,adjNode> mapNode: adjList.get(curNode.element).entrySet()){
-					if (mapNode.getValue().cost + curNode.totalCost > budget) { // budget exceeded
+				for (Entry<Integer,adjNode> mapNode: adjList.get(cur.node).entrySet()) {
+					// if new cost exceed budget, ignore and continue to next node
+                    if (mapNode.getValue().cost + cur.totalCost > energyBudget) {
 						continue;
 					}
+
                     if (mapNode.getValue().dist == -1 || mapNode.getValue().cost == -1) {
                         System.out.println("-1");
                     }
-					childNode = new queueNode(mapNode.getKey(), mapNode.getValue().dist + curNode.totalDist, mapNode.getValue().cost + curNode.totalCost);
-					childNode.path = curNode.path + "->" + childNode.element;
+
+					child = new qNode(mapNode.getKey(), mapNode.getValue().dist + cur.totalDist, mapNode.getValue().cost + cur.totalCost);
+					child.path = cur.path + "->" + child.node; // set child's path
 					
-					if (!priorityQueue.contains(childNode)) { // since queueNode.equals only compares .element, will match regardless of dist
-						priorityQueue.add(childNode);
-					} else { // element has previously been queued
-						for(queueNode node: priorityQueue){
-							if (node.equals(childNode) && node.totalDist > childNode.totalDist){ // if path in queue is longer than this new path, replace entry
-								priorityQueue.remove(node); // will remove old node with same element
-								priorityQueue.add(childNode); // add the new node into the queue
+					if (!pq.contains(child)) {
+						pq.add(child);
+					} else { // node has been queued before
+						for(qNode node: pq){ // find for node in priority queue
+							if (node.equals(child) && node.totalDist > child.totalDist){ // if path in queue is longer than this new path, replace entry
+								pq.remove(node);
+								pq.add(child);
 								break;
 							}
 						}

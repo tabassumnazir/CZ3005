@@ -90,3 +90,4 @@ public abstract class Algorithm {
     }
 
     public abstract void run(int startNode, int endNode);
+}
