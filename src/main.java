@@ -18,7 +18,7 @@ public class main {
             );
             choice = Integer.parseInt(sc.nextLine());
             if(choice == 1){
-                runTask = new task1();
+                runTask = new Task1();
             }
             else if(choice == 2){
                 System.out.print("Enter budget: ");
